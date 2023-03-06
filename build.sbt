@@ -1,6 +1,7 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.2.1"
+//ThisBuild / scalacOptions += "-verbose:class"
 
 lazy val root = (project in file("."))
   .settings(
@@ -9,5 +10,6 @@ lazy val root = (project in file("."))
     idePackagePrefix := Some("be.adamv.dejson"),
     resolvers += "jitpack" at "https://jitpack.io",
     libraryDependencies += "com.github.saasquatch" % "json-schema-inferrer" % "0.1.5",
-    libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.14.2"
+    libraryDependencies += "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.14.2",
+    libraryDependencies += "commons-validator" % "commons-validator" % "1.7"
   )
