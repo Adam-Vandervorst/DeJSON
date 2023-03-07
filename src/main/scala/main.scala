@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.saasquatch.jsonschemainferrer.*
 
+import java.io.File
 import java.time.{DayOfWeek, Month}
 
 
@@ -12,16 +13,16 @@ val mapper = ObjectMapper()
 val inferrer = JsonSchemaInferrer
   .newBuilder
   .setSpecVersion(SpecVersion.DRAFT_06)
-  .addFormatInferrers(FormatInferrers.email, FormatInferrers.ip)
+  .addFormatInferrers(FormatInferrers.email, FormatInferrers.dateTime, FormatInferrers.ip)
   .setAdditionalPropertiesPolicy(AdditionalPropertiesPolicies.notAllowed)
+  .setExamplesPolicy(ExamplesPolicies.useFirstSamples(3))
   .setRequiredPolicy(RequiredPolicies.nonNullCommonFields)
   .addEnumExtractors(EnumExtractors.validEnum(classOf[Month]), EnumExtractors.validEnum(classOf[DayOfWeek]))
+  .setArrayLengthFeatures(util.EnumSet.allOf(classOf[ArrayLengthFeature]))
   .build
 
-@main def example =
-  val sample1 = mapper.readTree("{\"🙈\":\"https://saasquatch.com\",\"🙉\":[-1.5,2,\"hello@saasquat.ch\",false],\"🙊\":3,\"weekdays\":[\"MONDAY\",\"TUESDAY\"]}")
-  val sample2 = mapper.readTree("{\"🙈\":1,\"🙉\":{\"🐒\":true,\"🐵\":[2,\"1234:5678::\"],\"🍌\":null},\"🙊\":null,\"months\":[\"JANUARY\",\"FEBRUARY\"]}")
-  val resultForSample1 = inferrer.inferForSample(sample1)
-  val resultForSample1And2 = inferrer.inferForSamples(util.Arrays.asList(sample1, sample2))
-  for (j <- List(sample1, sample2, resultForSample1, resultForSample1And2)) do
-    println(mapper.writeValueAsString(j))
+@main def example(filename: String) =
+  val f = new File(filename)
+  val contents = mapper.readTree(f)
+  val result = inferrer.inferForSample(contents)
+  println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result))
